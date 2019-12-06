@@ -1,7 +1,13 @@
 # Mapas2019
 Mapas 2DAM 2019-2020. Ejemplo de Usos y abusos
 
-is mapas
+V.2.0 Actualizado a API29
+No olvides añadir esto a tu Gradle
+    // Para mapas
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
+    // Para localización
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    
 
 Coloca una coordenada en un mapa de google.
 Cosas a tener en cuenta, se debe generar una API Key. En el Manifest
