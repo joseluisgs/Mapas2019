@@ -1,7 +1,7 @@
 # Mapas2019
 Mapas 2DAM 2019-2020. Ejemplo de Usos y abusos
 
-V.2.0 Actualizado a API29
+V.2.0 Actualizado a API27
 No olvides añadir esto a tu Gradle
     // Para mapas
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
