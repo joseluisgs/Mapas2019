@@ -2,6 +2,9 @@
 Mapas 2DAM 2019-2020. Ejemplo de Usos y abusos
 
 V.2.0 Actualizado a API27
+V.3.0 Actualizado a API29
+
+
 No olvides añadir esto a tu Gradle
     // Para mapas
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
@@ -15,11 +18,13 @@ Cosas a tener en cuenta, se debe generar una API Key. En el Manifest
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-En el modo debug se hace en ese fichero con la huella SHA-1 y s epone, en el Modo Release,
+En el modo debug se hace en ese fichero con la huella SHA-1 y se pone, en el Modo Release,
 se debe generar con keytool la huella SHA-1 con los datos del paquete Release, creaer un proyecto y subirla
 https://developers.google.com/maps/documentation/android-sdk/get-api-key
 
 SI NO VES EL MAPA ES POR ESO
+
+Revisa la clave de tu proyecto ssh y tu conexión con tu API de Google  si no lo ves!!!
 
 Se ha seguido este tutorial aproximadamente
 https://developers.google.com/maps/documentation/android-sdk/map-with-marker
