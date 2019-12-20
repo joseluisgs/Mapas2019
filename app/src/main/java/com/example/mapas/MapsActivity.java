@@ -132,7 +132,7 @@ public class MapsActivity extends FragmentActivity
                 .build();
 
         // Crear el LocationRequest
-        // Es muy similar a lo que yo he hecho manualmente con el reloj en     private void x {
+        // Es muy similar a lo que yo he hecho manualmente con el reloj en     private void autoActualizador {
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(10 * 1000)        // 10 segundos en milisegundos
@@ -398,7 +398,7 @@ public class MapsActivity extends FragmentActivity
     // Hilo con un reloj interno
     // Te acuerdas de los problemas de PSP con un Thread.Sleep()
     // Aqui lo llevas
-    private void x {
+    private void autoActualizador() {
         final Handler handler = new Handler();
         Timer timer = new Timer();
         TimerTask doAsyncTask = new TimerTask() {
