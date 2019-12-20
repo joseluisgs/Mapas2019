@@ -1,6 +1,7 @@
 package com.example.mapas;
 
 import android.Manifest;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -8,10 +9,15 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -25,7 +31,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MapsActivity extends FragmentActivity
-        implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener{
+        implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener{
+
 
     private GoogleMap mMap;
     private static final int LOCATION_REQUEST_CODE = 1; // Para los permisos
@@ -45,7 +54,10 @@ public class MapsActivity extends FragmentActivity
     // Marcador marcadorTouch
     private Marker marcadorTouch = null;
 
-
+    // Posición actual con eventos y no hilos
+    private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
+    private static final int  CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000 ;
 
 
 
@@ -109,6 +121,24 @@ public class MapsActivity extends FragmentActivity
         // Esto consume, por lo que ideal es activarlo y desactivarlo
         // cuando sea necesario
         //autoActualizador();
+
+
+        // Para usar eventos
+        // Yo lo haría con obtenerposición, pues hacemos lo mismo
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+
+        // Crear el LocationRequest
+        // Es muy similar a lo que yo he hecho manualmente con el reloj en     private void x {
+        mLocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(10 * 1000)        // 10 segundos en milisegundos
+                .setFastestInterval(1 * 1000); // 1 segundo en milisegundos
+
+
 
 
     }
@@ -354,6 +384,13 @@ public class MapsActivity extends FragmentActivity
             } else {
                 Toast.makeText(this, "Error de permisos", Toast.LENGTH_LONG).show();
             }
+            if (permissions.length > 0 &&
+                    permissions[0].equals(Manifest.permission.ACCESS_COARSE_LOCATION) &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                permisos = true;
+            } else {
+                Toast.makeText(this, "Error de permisos", Toast.LENGTH_LONG).show();
+            }
 
         }
     }
@@ -361,7 +398,7 @@ public class MapsActivity extends FragmentActivity
     // Hilo con un reloj interno
     // Te acuerdas de los problemas de PSP con un Thread.Sleep()
     // Aqui lo llevas
-    private void autoActualizador() {
+    private void x {
         final Handler handler = new Handler();
         Timer timer = new Timer();
         TimerTask doAsyncTask = new TimerTask() {
@@ -387,5 +424,62 @@ public class MapsActivity extends FragmentActivity
         // Actualizamos cada 10 segundos
         // podemos pararlo con timer.cancel();
         timer.schedule(doAsyncTask, 0, 10000);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        handleNewLocation(location);
+    }
+
+    private void handleNewLocation(Location location) {
+        Log.d("Mapa", location.toString());
+        miUltimaLocalizacion = location;
+        posActual = new LatLng(miUltimaLocalizacion.getLatitude(),
+                miUltimaLocalizacion.getLongitude());
+        // Añadimos un marcador especial para poder operar con esto
+        marcadorPosicionActual();
+        informarPosocion();
+        situarCamaraMapa();
+    }
+
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (location == null) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        }
+        else {
+            handleNewLocation(location);
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        if (connectionResult.hasResolution()) {
+            try {
+                // Start an Activity that tries to resolve the error
+                connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                /*
+                 * Thrown if Google Play services canceled the original
+                 * PendingIntent
+                 */
+            } catch (IntentSender.SendIntentException e) {
+                // Log the error
+                e.printStackTrace();
+            }
+        } else {
+            /*
+             * If no resolution is available, display a dialog to the
+             * user with the error.
+             */
+            Log.i("Mapa", "Location services connection failed with code " + connectionResult.getErrorCode());
+        }
+
     }
 }
